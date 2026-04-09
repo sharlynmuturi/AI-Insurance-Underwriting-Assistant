@@ -105,7 +105,7 @@ ANSWER:
 
 
 # UI
-st.title("AI Insurance Underwriting Assistant")
+st.title("AI Insurance Underwriter")
 
 st.header("Enter Policy Details")
 
@@ -138,7 +138,7 @@ query_features = {
     "speeding_score": speeding_score
 }
 
-user_question = f"Assess risk and recommend premium for a {age}-year-old {driver_type} driver with a {vehicle_age}-year-old {vehicle_type}, with {airbags} number of airbags in {region}, previous claims: {previous_claims}"
+user_question = f"Assess risk and recommend premium for a {age}-year-old {driver_type} driver with a {vehicle_age}-year-old {vehicle_type}, with {airbags} number of airbags and {tracking_device} tracking devices in {region}, previous claims: {previous_claims}"
 
 # Action button
 if st.button("Evaluate Policy"):
