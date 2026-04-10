@@ -127,8 +127,8 @@ QUESTION:
 INSTRUCTIONS:
 - Provide underwriting decision (Approve / Conditional / Decline)
 - Explain reasoning using risk score and similar cases
-- Justify the recommended premium
 - Highlight key risk drivers
+- Justify the recommended premium
 
 ANSWER:
 """
