@@ -114,10 +114,9 @@ def build_prompt(user_question, retrieved_policies, predicted_risk, pure_premium
     prompt = f"""
 You are an AI insurance underwriting assistant.
 
+RISK SCORE: {predicted_risk:.2f}
 PURE PREMIUM (EXPECTED LOSS): {pure_premium:.0f}
 RECOMMENDED PREMIUM: {premium:.0f}
-
-PREDICTED RISK SCORE: {predicted_risk:.2f}
 
 SIMILAR POLICIES:
 {context}
