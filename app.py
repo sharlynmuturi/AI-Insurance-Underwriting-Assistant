@@ -4,18 +4,28 @@ import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from langchain_groq import ChatGroq
+from pathlib import Path
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+BASE_DIR = Path(__file__).parent
+
+tweedie_model_path = BASE_DIR / "artifacts" / "tweedie_model.pkl"
+xgb_model_path = BASE_DIR / "artifacts" / "xgb_model.pkl"
+
+tweedie_feature_columns_path = BASE_DIR / "artifacts" / "tweedie_feature_columns.pkl"
+xgb_feature_columns_path = BASE_DIR / "artifacts" / "xgb_feature_columns.pkl"
 
 @st.cache_data
 def load_resources():
-    # Load model
-    model = joblib.load("xgb_model.pkl")
-    feature_columns = joblib.load("feature_columns.pkl")
+    tweedie_model = joblib.load(tweedie_model_path)
+    tweedie_feature_columns = joblib.load(tweedie_feature_columns_path)
+
+    xgb_model = joblib.load(xgb_model_path)
+    xgb_feature_columns = joblib.load(xgb_feature_columns_path)
 
     # Load dataset for KB
     df = pd.read_csv("insurance_dataset.csv")
@@ -41,9 +51,9 @@ def load_resources():
     vectorizer = TfidfVectorizer(max_features=5000)
     policy_vectors = vectorizer.fit_transform(df["policy_text"])
 
-    return model, feature_columns, df, vectorizer, policy_vectors
+    return tweedie_model, xgb_model, tweedie_feature_columns, xgb_feature_columns, df, vectorizer, policy_vectors
 
-model, feature_columns, df, vectorizer, policy_vectors = load_resources()
+tweedie_model, xgb_model, tweedie_feature_columns, xgb_feature_columns, df, vectorizer, policy_vectors = load_resources()
 
 
 client = ChatGroq(
@@ -66,11 +76,13 @@ def retrieve_similar_policies(query_text, top_k=5):
     top_idx = sims.argsort()[::-1][:top_k]
     return df.iloc[top_idx][["policy_text", "risk_score", "claim_occurred"]], sims[top_idx]
 
+
 def predict_risk_from_query(query_dict):
     input_df = pd.DataFrame([query_dict])
     input_df = pd.get_dummies(input_df)
-    input_df = input_df.reindex(columns=feature_columns, fill_value=0)
-    return model.predict_proba(input_df)[:, 1][0]
+    input_df = input_df.reindex(columns=xgb_feature_columns, fill_value=0)
+    return xgb_model.predict_proba(input_df)[:, 1][0]
+
 
 def calculate_premium(predicted_risk, vehicle_value,
                       expense_loading=0.3, profit_margin=0.1):
@@ -79,13 +91,31 @@ def calculate_premium(predicted_risk, vehicle_value,
     premium = max(premium, 5000)
     return expected_loss, premium
 
-def build_prompt(user_question, retrieved_policies, predicted_risk, premium):
+
+def predict_pure_premium(input_dict):
+    input_df = pd.DataFrame([input_dict])
+    
+    input_df = pd.get_dummies(input_df)
+    # Align with training columns
+    input_df = input_df.reindex(columns=tweedie_feature_columns, fill_value=0)
+    
+    # Predict expected loss (pure premium)
+    pure_premium = tweedie_model.predict(input_df)[0]
+    
+    return pure_premium
+
+def calculate_final_premium(pure_premium, expense_loading=0.3, profit_margin=0.1):
+    return pure_premium * (1 + expense_loading + profit_margin)
+
+def build_prompt(user_question, retrieved_policies, predicted_risk, pure_premium, premium):
     context = "\n".join(retrieved_policies["policy_text"].tolist())
     prompt = f"""
 You are an AI insurance underwriting assistant.
 
-PREDICTED RISK SCORE: {predicted_risk:.2f}
+PURE PREMIUM (EXPECTED LOSS): {pure_premium:.0f}
 RECOMMENDED PREMIUM: {premium:.0f}
+
+PREDICTED RISK SCORE: {predicted_risk:.2f}
 
 SIMILAR POLICIES:
 {context}
@@ -158,14 +188,13 @@ if st.button("Evaluate Policy"):
         # Retrieve
         retrieved_policies, sims = retrieve_similar_policies(user_question)
 
-        # Predict
+        pure_premium = predict_pure_premium(query_features)
+        premium = calculate_final_premium(pure_premium)
+
         predicted_risk = predict_risk_from_query(query_features)
 
-        # Premium
-        expected_loss, premium = calculate_premium(predicted_risk, vehicle_value)
-
         # Build prompt
-        prompt = build_prompt(user_question, retrieved_policies, predicted_risk, premium)
+        prompt = build_prompt(user_question, retrieved_policies, predicted_risk, pure_premium, premium)
 
         # Ask LLM
         answer = ask_groq(prompt)
@@ -174,9 +203,9 @@ if st.button("Evaluate Policy"):
 
     colA, colB, colC = st.columns(3)
 
-    colA.metric("Risk Score", f"{predicted_risk:.2f}")
-    colB.metric("Expected Loss", f"KES {expected_loss:,.0f}")
-    colC.metric("Recommended Premium", f"KES {premium:,.0f}")
+    colA.metric("Predicted Risk Score", f"{predicted_risk:.2f}")
+    colB.metric("Pure Premium (Expected Loss)", f"KES {pure_premium:,.0f}")
+    colC.metric("Loaded Premium", f"KES {premium:,.0f}")
 
     st.subheader("AI Underwriter Decision")
     st.write(answer)

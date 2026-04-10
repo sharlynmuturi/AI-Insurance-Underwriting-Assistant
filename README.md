@@ -127,47 +127,58 @@ Key insights explored:
 - Correlation between previous claims and risk score
 
 
-### 3. Risk Modeling using Machine Learning 
+### 3. Actuarial Modeling Framework
 
-`notebooks\02_risk_modeling.ipynb`
+The system follows a **frequency-severity modeling approach**, commonly used in insurance pricing:
+
+#### Frequency Model (Claim Occurrence)
+
+`02_model_claim_frequency.ipynb`
 
 Built a machine learning underwriting model to:
 
 - Predict **claim probability (frequency)**
 - Generate a **calibrated risk score**
 - Support **pricing via expected loss + premium calculation**
-- Feeds into a **RAG-based AI underwriting assistant**
+- Feed into a **RAG-based AI underwriting assistant**
 
-#### Data Preparation & Feature Engineering
+##### Data Preparation & Feature Engineering
 - Removed **data leakage variables** (e.g. premium, claim amount, risk score)
 - Created underwriting features:
-- **Safety Score** - captures protection level (airbags, tracking)
-- **Behavior Score** - captures driving risk (mileage, claims, speeding)
+    - **Safety Score** - captures protection level (airbags, tracking)
+    - **Behavior Score** - captures driving risk (mileage, claims, speeding)
     - **Risk buckets** - age bands, vehicle age bands
     - **Exposure indicator** - high mileage flag
 - Applied **one-hot encoding** for categorical variables
 - Used **correlation checks** to confirm no leakage remained
 
+##### Class Imbalance Handling
 
-#### Class Imbalance
--  Only ~8% of policies had claims. Handles class imbalance using Class weighting (Logistic Regression), SMOTE (Random Forest), `scale_pos_weight` (XGBoost)
+Only ~8% of policies resulted in claims.
 
-#### Models Trained & Insights
+Different strategies were used depending on the model:
 
-##### Logistic Regression (Baseline)
+- Logistic Regression - `class_weight="balanced"`
+- Random Forest - SMOTE oversampling
+- XGBoost - `scale_pos_weight`
+
+
+##### Models Trained & Insights
+
+###### Logistic Regression (Baseline)
 -  ROC-AUC: ~0.58 (best overall ranking performance)
 - Captured key drivers:
     - Higher risk: urban region, behavior score
     - Lower risk: safer driving, longer policies
 - Limitation: Poor separation of high-risk segments
 
-##### Gradient Boosting
+###### Gradient Boosting
 - Underperformed (recall ≈ 0)
 - Failed to identify claim cases effectively  
 
 **Rejected**
 
-##### Random Forest (with SMOTE)
+###### Random Forest (with SMOTE)
 
 - Improved balance vs GBM
 - Produced **better risk segmentation (monotonic bands)**
@@ -175,7 +186,7 @@ Built a machine learning underwriting model to:
 
 **Moderately useful**
 
-##### XGBoost (Final Model)
+###### XGBoost (Final Model)
 - Best **recall (~68%)** - captures most risky policies
 - Risk bands show **clear monotonic relationship** (Higher predicted risk - higher actual claim rate)
 - Feature importance aligned with real-world logic:
@@ -186,18 +197,59 @@ Built a machine learning underwriting model to:
 
 **Selected as final underwriting model**
 
+#### Severity Models (Claim Cost Given Claim)
 
-##### Actuarial Pricing Engine
+`03_model_claim_severity.ipynb`
 
-The pricing structure is enhanced using a model-driven expected loss framework, where premiums are derived from predicted claim probabilities rather than fixed percentage assumptions.
+Only claim-positive records were used.
 
-Premiums are calculated using expected loss pricing:
+Two actuarial regression approaches were tested:
 
-`expected_loss = model_predicted_risk × vehicle_value`
-> insurer’s anticipated claim cost
-  
-`technical_premium = expected_loss × (1 + expense_loading + profit_margin)`
-> premium ensuring operational costs are covered and profitability achieved
+##### Gamma Regression (GLM)
+- Models **positive continuous claim amounts**
+- Assumes Gamma distribution of severity
+- Performs well for smooth, skewed financial data
+
+##### Tweedie Regression (GLM)
+- Models **compound distribution (frequency + severity behavior)**
+- Naturally suited for insurance claims (many zeros + positive skewed losses)
+
+##### Model Comparison
+
+| Model | Performance | Observation |
+| --- | --- | --- |
+| Gamma Regression | Higher MAE / RMSE | Underfit complex non-linear patterns |
+| Tweedie Regression | Lower MAE / RMSE | Better overall predictive accuracy |
+
+**Tweedie Regression was selected as the final severity model**
+
+### 4. Pricing Engine (Actuarial Approach)
+
+The final pricing system follows a **two-stage actuarial model**:
+
+#### Step 1: Expected Loss (Pure Premium)
+
+`Expected Loss = Frequency × Severity`
+
+Where:
+- Frequency = probability of claim (XGBoost)
+- Severity = predicted claim size (Tweedie model)
+
+#### Step 2: Technical Premium
+
+`Technical Premium = Expected Loss × (1 + Expense Loading + Profit Margin)`
+
+Where:
+
+- Expense Loading = operational + acquisition costs (assumed 30%)
+- Profit Margin = insurer return target (assumed 10%)
+
+The system produces:
+
+*   Individual policy **claim probability**
+*   Expected **claim severity**
+*   Combined **expected loss**
+*   Final **technical premium per policy**
 
 ### 4. RAG System 
 
