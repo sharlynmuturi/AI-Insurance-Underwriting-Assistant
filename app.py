@@ -19,6 +19,8 @@ xgb_model_path = BASE_DIR / "artifacts" / "xgb_model.pkl"
 tweedie_feature_columns_path = BASE_DIR / "artifacts" / "tweedie_feature_columns.pkl"
 xgb_feature_columns_path = BASE_DIR / "artifacts" / "xgb_feature_columns.pkl"
 
+dataset_path = BASE_DIR / "artifacts" / "insurance_dataset.csv"
+
 @st.cache_data
 def load_resources():
     tweedie_model = joblib.load(tweedie_model_path)
@@ -28,7 +30,7 @@ def load_resources():
     xgb_feature_columns = joblib.load(xgb_feature_columns_path)
 
     # Load dataset for KB
-    df = pd.read_csv("insurance_dataset.csv")
+    df = pd.read_csv(dataset_path)
 
     # Create text representation if not exists
     if "policy_text" not in df.columns:
