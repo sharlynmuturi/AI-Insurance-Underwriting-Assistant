@@ -95,10 +95,9 @@ Final risk score is clipped between **0 and 1**
 
 #### Pricing
 
-- Base premium at **5% of vehicle value**
-- Final premium is Adjusted by risk score:
+The dataset assumes a baseline pricing strategy set at approximately 5% of the vehicle value, then adjusted using a risk score to reflect the policyholder’s risk profile.
         
-   premium = base_premium * (1 + risk_score)
+   `premium = base_premium * (1 + risk_score)`
         
 
 #### Claims Generation Assumptions
@@ -184,12 +183,14 @@ Built a machine learning underwriting model to:
 
 ##### Actuarial Pricing Engine
 
+The pricing structure is enhanced using a model-driven expected loss framework, where premiums are derived from predicted claim probabilities rather than fixed percentage assumptions.
+
 Premiums are calculated using expected loss pricing:
 
-- expected_loss = model_predicted_risk × vehicle_value
+`expected_loss = model_predicted_risk × vehicle_value`
 > insurer’s anticipated claim cost
   
-- technical_premium = expected_loss × (1 + expense_loading + profit_margin)
+`technical_premium = expected_loss × (1 + expense_loading + profit_margin)`
 > premium ensuring operational costs are covered and profitability achieved
 
 ### 4. RAG System `notebooks\03_TF-IDF_rag.ipynb` & `notebooks\04_sentence_transformers_rag.ipynb`
