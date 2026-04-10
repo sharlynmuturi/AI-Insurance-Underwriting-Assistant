@@ -57,6 +57,8 @@ Synthetic insurance dataset was generated using domain-driven assumptions on dri
 - Harsh braking modeled via **Poisson distribution** with an average rate (λ = 5) to simulate driving behavior intensity.
 
 #### Claims & Fraud
+- Fraud rate assumed low (~5%)
+- Time since last claim randomized if prior claims exist
 - Previous claims follow **Poisson distribution (λ = 0.5)**.
 
 Poisson distribution is used to model how many times something happens in a fixed period of time. Claim frequency is often modeled using Poisson since claims are random but with an average rate, rare and discrete.
@@ -69,9 +71,6 @@ For λ = 0.5, a driver has on average 0.5 claims per period roughly:
 | 1 | ~30% |
 | 2 | ~7% |
 | 3+ | very rare |
-
-- Fraud rate assumed low (~5%)
-- Time since last claim randomized if prior claims exist
 
 #### Risk Scoring Logic (Core Assumption)
 
@@ -193,7 +192,7 @@ Premiums are calculated using expected loss pricing:
 - technical_premium = expected_loss × (1 + expense_loading + profit_margin)
 > premium ensuring operational costs are covered and profitability achieved
 
-### 4. RAG System
+### 4. RAG System `notebooks\03_TF-IDF_rag.ipynb` & `notebooks\04_sentence_transformers_rag.ipynb`
 #### Policy Knowledge Base
 
 Each policy is converted into structured text to create a **retrieval-ready knowledge base**:
@@ -208,11 +207,7 @@ Eg:
 Two retrieval approaches were implemented:
 
 - TF-IDF - Converts policy text into sparse vectors and Uses word frequency weighting 
-`notebooks\03_TF-IDF_rag.ipynb`
-
 - Sentence Transformers - Uses `all-MiniLM-L6-v2` to convert policies into dense semantic embeddings. Captures meaning, not just keywords 
-`notebooks\04_sentence_transformers_rag.ipynb`
-
 
 #### RAG (Retrieval-Augmented Generation)
 
