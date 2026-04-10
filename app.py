@@ -109,20 +109,32 @@ st.title("AI Vehicle Insurance Underwriter")
 
 st.header("Enter Policy Details")
 
-# User inputs
-age = st.number_input("Age", min_value=18, max_value=100, value=30)
-driver_type = st.selectbox("Driver Type", ["private", "taxi", "commercial"])
-vehicle_type = st.selectbox("Vehicle Type", ["sedan", "SUV", "pickup", "truck"])
-vehicle_age = st.number_input("Vehicle Age (years)", min_value=0, max_value=20, value=3)
-vehicle_value = st.number_input("Vehicle Value (KES)", min_value=50000, value=120000)
-annual_mileage = st.number_input("Annual Mileage (km)", min_value=0, value=15000)
-previous_claims = st.number_input("Previous Claims", min_value=0, value=0)
-airbags = st.number_input("Number of Airbags", min_value=0, value=4)
-tracking_device = st.selectbox("Tracking Device Installed?", [1,0])
-region = st.selectbox("Region", ["Nairobi", "Mombasa", "Kisumu", "Rural"])
-policy_duration = st.selectbox("Policy Duration (months)", [3,6,9,12])
-speeding_score = st.selectbox("Speeding Score", ["low", "medium", "high"])
+col1, col2, col3 = st.columns(3)
 
+with col1:
+    st.subheader("Driver Info")
+
+    age = st.number_input("Age", 18, 100, 30)
+    driver_type = st.selectbox("Driver Type", ["private", "taxi", "commercial"])
+    previous_claims = st.number_input("Previous Claims", 0, value=0)
+    speeding_score = st.selectbox("Speeding Score", ["low", "medium", "high"])
+
+with col2:
+    st.subheader("Vehicle Info")
+
+    vehicle_type = st.selectbox("Vehicle Type", ["sedan", "SUV", "pickup", "truck"])
+    vehicle_age = st.number_input("Vehicle Age (years)", 0, 20, 3)
+    vehicle_value = st.number_input("Vehicle Value (KES)", 50000, value=120000)
+    annual_mileage = st.number_input("Annual Mileage (km)", 0, value=15000)
+
+with col3:
+    st.subheader("Policy & Safety")
+
+    airbags = st.number_input("Number of Airbags", 0, value=4)
+    tracking_device = st.selectbox("Tracking Device Installed?", [1, 0])
+    region = st.selectbox("Region", ["Nairobi", "Mombasa", "Kisumu", "Rural"])
+    policy_duration = st.selectbox("Policy Duration (months)", [3, 6, 9, 12])
+    
 query_features = {
     "age": age,
     "driver_type": driver_type,
@@ -159,10 +171,14 @@ if st.button("Evaluate Policy"):
         answer = ask_groq(prompt)
 
     st.subheader("Predicted Risk & Premium")
-    st.write(f"Predicted Risk Score: {predicted_risk:.2f}")
-    st.write(f"Recommended Premium: KES {premium:,.0f}")
 
-    st.subheader("AI Underwriter Explanation")
+    colA, colB, colC = st.columns(3)
+
+    colA.metric("Risk Score", f"{predicted_risk:.2f}")
+    colB.metric("Expected Loss", f"KES {expected_loss:,.0f}")
+    colC.metric("Recommended Premium", f"KES {premium:,.0f}")
+
+    st.subheader("AI Underwriter Decision")
     st.write(answer)
 
     st.subheader("Similar Policies (Knowledge Based)")
