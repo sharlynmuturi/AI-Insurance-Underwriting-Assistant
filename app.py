@@ -134,7 +134,7 @@ with col3:
     tracking_device = st.selectbox("Tracking Device Installed?", [1, 0])
     region = st.selectbox("Region", ["Nairobi", "Mombasa", "Kisumu", "Rural"])
     policy_duration = st.selectbox("Policy Duration (months)", [3, 6, 9, 12])
-    
+
 query_features = {
     "age": age,
     "driver_type": driver_type,
@@ -150,7 +150,7 @@ query_features = {
     "speeding_score": speeding_score
 }
 
-user_question = f"Assess risk and recommend premium for a {age}-year-old {driver_type} driver with a {vehicle_age}-year-old {vehicle_type}, with {airbags} number of airbags and {tracking_device} tracking devices in {region}, previous claims: {previous_claims}"
+user_question = f"Assess risk and recommend premium for a policy duration of {policy_duration} months for a {age}-year-old {driver_type} driver with a {vehicle_age}-year-old {vehicle_type} valued at {vehicle_value} with {annual_mileage} km/year mileage, {airbags} number of airbags and {tracking_device} tracking devices in {region}, previous claims: {previous_claims}"
 
 # Action button
 if st.button("Evaluate Policy"):
