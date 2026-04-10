@@ -101,28 +101,6 @@ Interactive web app where users input driver details, vehicle details and policy
 - AI-generated underwriting explanation.
 
 
-### System Architecture
-
-User Input
-   ↓  
-Feature Engineering  
-   ↓  
-XGBoost Risk Model  
-   ↓  
-Actuarial Pricing Engine  
-   ↓  
-Policy Text Generation  
-   ↓  
-Vector Search (TF-IDF / BERT)  
-   ↓  
-RAG Context Builder  
-   ↓  
-Groq LLM (LLaMA 3)  
-   ↓  
-Underwriting Decision + Explanation
-
-
-
 ### How to Run
 
 1. Install dependencies  
