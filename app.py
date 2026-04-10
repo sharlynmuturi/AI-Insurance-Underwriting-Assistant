@@ -165,5 +165,5 @@ if st.button("Evaluate Policy"):
     st.subheader("AI Underwriter Explanation")
     st.write(answer)
 
-    st.subheader("Similar Policies (KB)")
+    st.subheader("Similar Policies (Knowledge Based)")
     st.dataframe(retrieved_policies)
