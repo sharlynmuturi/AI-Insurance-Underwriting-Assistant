@@ -13,8 +13,8 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 @st.cache_data
 def load_resources():
-    # Load Rf/ML model
-    model = joblib.load("model.pkl")
+    # Load model
+    model = joblib.load("xgb_model.pkl")
     feature_columns = joblib.load("feature_columns.pkl")
 
     # Load dataset for KB
@@ -105,7 +105,7 @@ ANSWER:
 
 
 # UI
-st.title("AI Insurance Underwriter")
+st.title("AI Vehicle Insurance Underwriter")
 
 st.header("Enter Policy Details")
 
