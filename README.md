@@ -11,7 +11,9 @@ An end-to-end **AI-powered insurance underwriting system** that combines:
 The system evaluates insurance applications, predicts risk, retrieves similar historical policies, and generates underwriting decisions with explanations.
 
 ## Project Structure
-### 1. Data Generation `generate_data.py`
+### 1. Data Generation 
+
+`generate_data.py`
 
 Synthetic insurance dataset was generated using domain-driven assumptions on driver behavior, vehicle characteristics, geographic risk, and underwriting rules, with probabilistic modeling of claims frequency, severity, and pricing to simulate realistic insurance operations.
 
@@ -109,7 +111,9 @@ The dataset assumes a baseline pricing strategy set at approximately 5% of the v
     - Otherwise - accident
 
 
-### 2. Exploratory Data Analysis (EDA) `notebooks\01_data_exploration.ipynb`
+### 2. Exploratory Data Analysis (EDA) 
+
+`notebooks\01_data_exploration.ipynb`
 
 An extensive EDA was performed to ensure the dataset reflects a realistic insurance portfolio with appropriate variation in demographics, vehicles, and behavior.
 
@@ -123,7 +127,9 @@ Key insights explored:
 - Correlation between previous claims and risk score
 
 
-### 3. Risk Modeling using Machine Learning `notebooks\02_risk_modeling.ipynb`
+### 3. Risk Modeling using Machine Learning 
+
+`notebooks\02_risk_modeling.ipynb`
 
 Built a machine learning underwriting model to:
 
@@ -193,7 +199,12 @@ Premiums are calculated using expected loss pricing:
 `technical_premium = expected_loss × (1 + expense_loading + profit_margin)`
 > premium ensuring operational costs are covered and profitability achieved
 
-### 4. RAG System `notebooks\03_TF-IDF_rag.ipynb` & `notebooks\04_sentence_transformers_rag.ipynb`
+### 4. RAG System 
+
+`notebooks\03_TF-IDF_rag.ipynb`
+
+`notebooks\04_sentence_transformers_rag.ipynb`
+
 #### Policy Knowledge Base
 
 Each policy is converted into structured text to create a **retrieval-ready knowledge base**:
