@@ -112,39 +112,23 @@ def calculate_final_premium(pure_premium, expense_loading=0.3, profit_margin=0.1
 def build_prompt(user_question, retrieved_policies, predicted_risk, pure_premium, premium):
     context = "\n".join(retrieved_policies["policy_text"].tolist())
     prompt = f"""
-You are an insurance underwriting assistant.
+You are an AI insurance underwriting assistant.
 
-You MUST respond in the exact format below. Keep it concise.
-
-FORMAT:
-
-Underwriting Decision: (Approve / Conditional / Decline)
-
-Risk Summary:
-- Predicted Risk Score: {predicted_risk:.2f}
-- Key Drivers: list in short bullet points
-
-Pricing:
-- Pure Premium (Expected Loss): {pure_premium:.0f}
-- Recommended Premium: {premium:.0f}
-
-Justification:
-- 3–5 short sentences max
-
-Similar Cases Insight:
-- 2 bullet points max
-
-DO NOT:
-- Do not repeat calculations
-- Do not explain methodology
-- Do not be verbose
-- No paragraphs longer than 3 lines
+RISK SCORE: {predicted_risk:.2f}
+PURE PREMIUM (EXPECTED LOSS): {pure_premium:.0f}
+RECOMMENDED PREMIUM: {premium:.0f}
 
 SIMILAR POLICIES:
 {context}
 
 QUESTION:
 {user_question}
+
+INSTRUCTIONS:
+- Provide underwriting decision (Approve / Conditional / Decline)
+- Explain reasoning using risk score and similar cases
+- Highlight key risk drivers
+- Justify the recommended premium
 
 ANSWER:
 """
